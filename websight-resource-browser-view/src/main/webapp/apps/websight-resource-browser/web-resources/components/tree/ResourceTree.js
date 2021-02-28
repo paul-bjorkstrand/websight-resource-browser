@@ -143,6 +143,9 @@ export default class ResourceTree extends React.Component {
                                 isDragEnabled
                                 isNestingEnabled
                             />
+                            {this.props.extraActions && this.props.extraActions.map((action) => {
+                                return action.modal();
+                            })}
                             <CreateResourceModal
                                 changelog={changelog}
                                 onChangelogUpdate={onChangelogUpdate}

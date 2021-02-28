@@ -43,6 +43,7 @@ export default class CreateResourceModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            newNodeName: '',
             availableTypes: {},
             defaultTypes: {},
             selectedType: '',
@@ -54,6 +55,7 @@ export default class CreateResourceModal extends React.Component {
         this.open = this.open.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         this.validateName = this.validateName.bind(this);
+        this.nodeTypeSelected = this.nodeTypeSelected.bind(this);
     }
 
     close() {
@@ -79,6 +81,7 @@ export default class CreateResourceModal extends React.Component {
                 isOpen: true,
                 resource: resource
             });
+            this.nodeTypeSelected(this.state.selectedType, defaultProvider, availableTypes)
         });
     }
 
@@ -135,6 +138,19 @@ export default class CreateResourceModal extends React.Component {
         }
     }
 
+    nodeTypeSelected(typeName, selectedProvider, availableTypes) {
+        const selectedType = availableTypes[selectedProvider]
+            .find(available => available.name === typeName)
+        this.setState({ selectedType: selectedType })
+        if (selectedType && selectedType.allowedChildName !== '*') {
+            this.setState({ newNodeName: selectedType.allowedChildName })
+            this.nameTextField.disabled = true;
+        } else {
+            this.setState({ newNodeName: '' })
+            this.nameTextField.disabled = false;
+        }
+    }
+
     render() {
         const { availableTypes, defaultTypes, isOpen, resource, selectedProvider, selectedType } = this.state;
 
@@ -159,8 +175,7 @@ export default class CreateResourceModal extends React.Component {
                         defaultValue={typeOptions.find(({ label }) => label === defaultTypes[selectedProvider])}
                         menuPosition='fixed'
                         noOptionsMessage={() => ('No type is allowed under selected parent path.')}
-                        onChange={(type) => this.setState({ selectedType: availableTypes[selectedProvider]
-                            .find(available => available.name === type.value) })}
+                        onChange={(type) => this.nodeTypeSelected(type.value, selectedProvider, availableTypes)}
                     />
                     {typeMandatoryProperties.length > 0 && (
                         <>
@@ -219,6 +234,8 @@ export default class CreateResourceModal extends React.Component {
                                         autocomplete='off'
                                         label='Name'
                                         name='name'
+                                        value={this.state.newNodeName}
+                                        ref={element => this.nameTextField = element}
                                         isRequired={true}
                                         validate={this.validateName}
                                     />

@@ -10,6 +10,7 @@ public class ResourceListDto {
 
     private final String name;
     private final String path;
+    private final String type;
     private final List<String> providers;
     private String shadowedBy;
 
@@ -23,6 +24,11 @@ public class ResourceListDto {
             boolean orderable) {
         this.name = providedResource.getName();
         this.path = providedResource.getPath();
+        if (providedResource.getPrimaryVariant() != null) {
+            this.type = providedResource.getPrimaryVariant().getValue().getResourceType();
+        } else {
+            this.type = null;
+        }
         this.shadowedBy = shadowedBy;
         this.providers = providedResource.getAvailableProviders();
         this.hasContent = hasContent;
@@ -33,6 +39,7 @@ public class ResourceListDto {
     public ResourceListDto(Resource resource, List<String> providers, boolean hasContent) {
         this.name = resource.getName();
         this.path = resource.getPath();
+        this.type = resource.getResourceType();
         this.providers = providers;
         this.hasContent = hasContent;
         this.hasChildren = resource.hasChildren();
@@ -51,6 +58,10 @@ public class ResourceListDto {
 
     public String getPath() {
         return path;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public String getShadowedBy() {

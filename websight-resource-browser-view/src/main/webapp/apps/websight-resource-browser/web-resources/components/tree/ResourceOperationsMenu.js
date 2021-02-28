@@ -2,6 +2,7 @@ import React from 'react';
 import DropdownMenu, { DropdownItem, DropdownItemGroup } from '@atlaskit/dropdown-menu';
 import Tooltip from '@atlaskit/tooltip';
 import styled from 'styled-components';
+import { fetchApplicableActions } from 'websight-admin/utils/ExtraActionsUtil';
 
 import ChangelogWriteService from '../../services/ChangelogWriteService.js';
 
@@ -33,7 +34,8 @@ export default class ResourceOperationsMenu extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            isOpen: this.props.selected || false
+            isOpen: this.props.selected || false,
+            extraActions: this.props.extraActions
         }
         this.close = this.close.bind(this);
         this.open = this.open.bind(this);
@@ -57,12 +59,20 @@ export default class ResourceOperationsMenu extends React.Component {
         }
     }
 
+    filterActions(event) {
+        if (event.isOpen) {
+            fetchApplicableActions(this.props.extraActions, this.props.resource.path, (actions) => {
+                this.setState({ extraActions: actions })
+            })
+        }
+    }
+
     render() {
         const { changelog, children, onChangelogUpdate, onCreateResource, onRenameResource, resource, onCopyMoveResource,
             onTreeRefresh, onNodeRefresh, loadingResources } = this.props;
+        const { extraActions } = this.state;
 
         const createResourceOption = { label: 'Create Resource', icon: 'add', props: { onClick: () => onCreateResource(resource) } };
-        const showContextMenu = resource.showContextMenu;
 
         const options = [
             createResourceOption,
@@ -80,7 +90,7 @@ export default class ResourceOperationsMenu extends React.Component {
             { label: 'Rename Resource', icon: 'edit', props: { onClick: onRenameResource } },
             { label: 'Move Resource', icon: 'swap_vert', props: { onClick: () => onCopyMoveResource(resource, true) } },
             { label: 'Copy Resource', icon: 'content_copy', props: { onClick: () => onCopyMoveResource(resource, false) } }
-            
+
         ];
 
         const rootOptions = [
@@ -91,9 +101,13 @@ export default class ResourceOperationsMenu extends React.Component {
         return (
             <div style={{ position: 'relative' }} >
                 {children}
-                {this.state.isOpen && (<> {showContextMenu && (
+                {this.state.isOpen && (<>
                     <ResourceOperationsContextMenuContainer>
-                        <DropdownMenu defaultOpen={true}>
+                        <DropdownMenu defaultOpen={resource.showContextMenu} onOpenChange={(e) => {
+                            if (!e.isOpen) {
+                                resource.showContextMenu = false;
+                            }
+                        }}>
                             <DropdownItemGroup >
                                 {(resource.path === '/' ? rootOptions : options).map(({ icon, label, props }) => (
                                     <DropdownItem key={label}
@@ -103,28 +117,50 @@ export default class ResourceOperationsMenu extends React.Component {
                                         {label}
                                     </DropdownItem>
                                 ))}
+                                {extraActions && extraActions.map((action, index) => {
+                                    return (
+                                        <DropdownItem
+                                            spacing='compact'
+                                            key={index}
+                                            onClick={() => action.onClick(resource)}>
+                                            <OperationIcon className='material-icons'>{action.icon}</OperationIcon>
+                                            {action.label}
+                                        </DropdownItem>
+                                    )
+                                })}
                             </DropdownItemGroup>
                         </DropdownMenu>
-                    </ResourceOperationsContextMenuContainer>)}
-                <ResourceOperationsMenuContainer>
-                    <DropdownMenu defaultOpen={false} triggerType={'button'}
-                        triggerButtonProps={{ iconBefore: <OperationIcon className='material-icons'>more_vert</OperationIcon> }}>
-                        <DropdownItemGroup >
-                            {(resource.path === '/' ? rootOptions : options).map(({ icon, label, props }) => (
-                                <Tooltip key={label} content={label} delay={0}>
-                                    <DropdownItem
-                                        {...props}
-                                        spacing='compact'>
-                                        <OperationIcon className='material-icons'>{icon}</OperationIcon>
-                                    </DropdownItem>
-                                </Tooltip>
-                            ))}
-                        </DropdownItemGroup>
-                    </DropdownMenu>
-                </ResourceOperationsMenuContainer></>
+                    </ResourceOperationsContextMenuContainer>
+                    <ResourceOperationsMenuContainer>
+                        <DropdownMenu defaultOpen={false} triggerType={'button'} onOpenChange={(event) => this.filterActions(event)}
+                            triggerButtonProps={{ iconBefore: <OperationIcon className='material-icons'>more_vert</OperationIcon> }}>
+                            <DropdownItemGroup >
+                                {(resource.path === '/' ? rootOptions : options).map(({ icon, label, props }) => (
+                                    <Tooltip key={label} content={label} delay={0}>
+                                        <DropdownItem
+                                            {...props}
+                                            spacing='compact'>
+                                            <OperationIcon className='material-icons'>{icon}</OperationIcon>
+                                        </DropdownItem>
+                                    </Tooltip>
+                                ))}
+                                {extraActions && extraActions.map((action, index) => {
+                                    return (
+                                        <Tooltip key={action.label} content={action.label} delay={0}>
+                                            <DropdownItem
+                                                spacing='compact'
+                                                key={index}
+                                                onClick={() => action.onClick(resource)}>
+                                                <OperationIcon className='material-icons'>{action.icon}</OperationIcon>
+                                            </DropdownItem>
+                                        </Tooltip>
+                                    )
+                                })}
+                            </DropdownItemGroup>
+                        </DropdownMenu>
+                    </ResourceOperationsMenuContainer></>
                 )}
             </div>
         )
-
     }
 }

@@ -13,6 +13,8 @@ import { PageContentContainer } from 'websight-admin/Containers';
 import GlobalNavigation from 'websight-admin/GlobalNavigation';
 import { getUrlHashValue, setUrlHashValue } from 'websight-admin/services/SearchParamsService';
 import { AUTH_CONTEXT_UPDATED } from 'websight-rest-atlaskit-client/RestClient';
+import { getWebFragments } from 'websight-fragments-esm';
+import { errorNotification } from '/apps/websight-rest-atlaskit-client/web-resources/js/Notification.js';
 
 import ChangelogPopup from './components/ChangelogPopup.js';
 import ChangelogReadService from './services/ChangelogReadService.js';
@@ -90,7 +92,8 @@ export default class ResourceBrowser extends React.Component {
             recentlyOpenedEditor: {},
             providersMenuOpen: false,
             loadingResources: true,
-            savingChanges: false
+            savingChanges: false,
+            extraActions: null
         };
 
         this.onTreeMutation = this.onTreeMutation.bind(this);
@@ -105,6 +108,8 @@ export default class ResourceBrowser extends React.Component {
         this.refreshTree = this.refreshTree.bind(this);
         this.preventLeavingThePage = this.preventLeavingThePage.bind(this);
         this.onRevertChanges = this.onRevertChanges.bind(this);
+
+        getWebFragments('websight.admin.resourcebrowser.extra.actions', (fragments) => this.setState({ extraActions: fragments }), errorNotification);
     }
 
     componentDidMount() {
@@ -425,7 +430,7 @@ export default class ResourceBrowser extends React.Component {
     render() {
         const { loadingResources, tree, providers, selectedResource,
             selectedProviders, providersMenuOpen, changelog,
-            openedResourceEditors, recentlyOpenedEditor, savingChanges } = this.state;
+            openedResourceEditors, recentlyOpenedEditor, savingChanges, extraActions } = this.state;
 
         const isChangelogEmpty = ChangelogReadService.isEmpty(this.state.changelog);
 
@@ -454,6 +459,7 @@ export default class ResourceBrowser extends React.Component {
                                 toggleProvidersMenu={({ isOpen, event }) => event && this.setState(() => ({ providersMenuOpen: isOpen }))}
                                 tree={tree}
                                 providers={providers}
+                                extraActions={extraActions}
                                 selectedResource={selectedResource}
                                 selectedProviders={selectedProviders}
                                 onChangelogUpdate={this.onChangelogUpdate}

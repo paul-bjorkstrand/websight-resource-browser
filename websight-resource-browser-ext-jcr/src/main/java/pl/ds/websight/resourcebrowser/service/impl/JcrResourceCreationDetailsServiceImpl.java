@@ -1,5 +1,6 @@
 package pl.ds.websight.resourcebrowser.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -25,6 +26,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -42,15 +45,24 @@ public class JcrResourceCreationDetailsServiceImpl implements ResourceCreationIn
             List<JcrChildrenNodeType> allowedTypes = new ArrayList<>();
             try {
                 NodeTypeManager nodeTypeManager = workspace.getNodeTypeManager();
+                NodeType nodeType = getNodeType(nodeTypeManager, session, path, type);
+                if (nodeType == null) {
+                    LOG.warn("Could not obtain requested node type");
+                    return null;
+                }
                 NodeTypeIterator allNodeTypes = nodeTypeManager.getAllNodeTypes();
+                Set<String> childrenNames = Arrays.stream(nodeType.getChildNodeDefinitions()).map(nodeDefinition -> nodeDefinition.getName()).collect(
+                        Collectors.toSet());
+                childrenNames.add("*");
                 while (allNodeTypes.hasNext()) {
                     NodeType nextNodeType = (NodeType) allNodeTypes.next();
                     boolean isMixin = nextNodeType.isMixin();
                     boolean isAbstract = nextNodeType.isAbstract();
-                    if (!isMixin && !isAbstract) {
+                    String allowedChildName = getAllowedChildName(nodeType, nextNodeType, childrenNames);
+                    if (!isMixin && !isAbstract && StringUtils.isNotBlank(allowedChildName)) {
                         Map<String, JcrChildrenNodeType> requiredChildrenNodes = getRequiredChildren(nextNodeType);
                         List<MandatoryJcrChildProperty> requiredProperties = getRequiredProperties(nextNodeType);
-                        allowedTypes.add(new JcrChildrenNodeType(nextNodeType.getName(), requiredChildrenNodes, requiredProperties));
+                        allowedTypes.add(new JcrChildrenNodeType(nextNodeType.getName(), allowedChildName, requiredChildrenNodes, requiredProperties));
                     } else {
                         LOG.debug("Skipping node type: {}, mixin: {}, abstract: {}", nextNodeType.getName(), isMixin, isAbstract);
                     }
@@ -66,13 +78,27 @@ public class JcrResourceCreationDetailsServiceImpl implements ResourceCreationIn
         return null;
     }
 
+    String getAllowedChildName(NodeType nodeType, NodeType childNodeType, Set<String> childrenNames) {
+        return childrenNames.stream().filter(childNodeName -> nodeType.canAddChildNode(childNodeName, childNodeType.getName())).findAny().orElse("");
+    }
+
+    private NodeType getNodeType(NodeTypeManager nodeTypeManager, Session session, String path, String type) throws RepositoryException {
+       if (nodeTypeManager.hasNodeType(type)) {
+           return nodeTypeManager.getNodeType(type);
+       }
+       if (session.itemExists(path)) {
+           return session.getNode(path).getPrimaryNodeType();
+       }
+       return null;
+    }
+
     private static Map<String, JcrChildrenNodeType> getRequiredChildren(NodeType nodeType) {
         NodeDefinition[] childrenDefinitions = nodeType.getChildNodeDefinitions();
         if (childrenDefinitions != null && childrenDefinitions.length > 0) {
             return Arrays.stream(childrenDefinitions)
                     .filter(ItemDefinition::isMandatory)
                     .collect(toMap(ItemDefinition::getName, definition ->
-                            new JcrChildrenNodeType(String.join(", ", getNodeTypes(definition.getRequiredPrimaryTypes())), null,
+                            new JcrChildrenNodeType(String.join(", ", getNodeTypes(definition.getRequiredPrimaryTypes())), "", null,
                                     getRequiredProperties(definition.getDeclaringNodeType()))
                     ));
         }

@@ -285,7 +285,7 @@ export default class ResourceTreeNode extends React.Component {
     render() {
         const { editing } = this.state;
         const { changelog, onChangelogUpdate, onCreateResource, resource, selectedResource, loadingResources,
-            onTreeRefresh, onCopyMoveResource, tree, errorMessage, dragging } = this.props;
+            onTreeRefresh, onCopyMoveResource, tree, errorMessage, dragging, extraActions } = this.props;
 
         const selected = resource.id === selectedResource.id;
         const { created, modified, removed } = ChangelogReadService.getResourceState(changelog, resource);
@@ -341,6 +341,7 @@ export default class ResourceTreeNode extends React.Component {
                         resource={resource}
                         selected={selected}
                         loadingResources={loadingResources}
+                        extraActions={extraActions}
                         onTreeRefresh={() => onTreeRefresh(ChangelogReadService.getExpandedPaths(changelog, tree))}
                         onNodeRefresh={() => onTreeRefresh(ChangelogReadService.getExpandedPaths(changelog, tree).filter(path => path.includes(resource.path)))}
                     >

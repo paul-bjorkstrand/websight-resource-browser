@@ -31,18 +31,24 @@ public class JcrResourceCreationInfoDto {
     public static class JcrChildrenNodeType {
 
         private final String name;
+        private final String allowedChildName;
         private final Map<String, JcrChildrenNodeType> mandatoryChildren;
         private final List<MandatoryJcrChildProperty> mandatoryProperties;
 
-        public JcrChildrenNodeType(String name, Map<String, JcrChildrenNodeType> mandatoryChildren,
+        public JcrChildrenNodeType(String name, String allowedChildName, Map<String, JcrChildrenNodeType> mandatoryChildren,
                                    List<MandatoryJcrChildProperty> mandatoryProperties) {
             this.name = name;
+            this.allowedChildName = allowedChildName;
             this.mandatoryChildren = mandatoryChildren;
             this.mandatoryProperties = mandatoryProperties;
         }
 
         public String getName() {
             return name;
+        }
+
+        public String getAllowedChildName() {
+            return allowedChildName;
         }
 
         public Map<String, JcrChildrenNodeType> getMandatoryChildren() {

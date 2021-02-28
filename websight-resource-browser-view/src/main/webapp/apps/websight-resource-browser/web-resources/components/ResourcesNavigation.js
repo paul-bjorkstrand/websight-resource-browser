@@ -204,7 +204,7 @@ export default class ResourcesNavigation extends React.Component {
     render() {
         const { changelog, loadingResources, onChangelogUpdate, providersMenuOpen, tree, providers,
             selectedResource, selectedProviders, toggleProvidersMenu,
-            onProvidersChange, onOpenResourcesEditor, onTreeRefresh } = this.props;
+            onProvidersChange, onOpenResourcesEditor, onTreeRefresh, extraActions } = this.props;
 
         const selectedProvidersValues = selectedProviders.map(selected => selected.value);
 
@@ -308,6 +308,7 @@ export default class ResourcesNavigation extends React.Component {
                         changelog={changelog}
                         selectedResource={selectedResource}
                         selectedProviders={selectedProviders}
+                        extraActions={extraActions}
                         onChangelogUpdate={onChangelogUpdate}
                         onSelect={this.onResourceSelect}
                         onTreeMutation={this.localOnTreeMutation}

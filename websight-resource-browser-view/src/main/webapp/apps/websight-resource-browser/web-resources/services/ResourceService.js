@@ -14,6 +14,7 @@ const mapResourceData = (resource, allProviders) => ({
     id: resource.path,
     name: resource.name,
     path: resource.path,
+    type: resource.type,
     shadowedBy: resource.shadowedBy,
     providers: resource.providers.map((provider) => ({
         ...allProviders.find((({ value }) => value === provider)),
