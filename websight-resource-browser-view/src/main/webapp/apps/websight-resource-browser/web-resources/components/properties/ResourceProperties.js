@@ -160,7 +160,8 @@ export default class ResourceProperties extends React.Component {
         if (updatedCreatedProperties) {
             createdProperties = updatedCreatedProperties;
         }
-        const isAlreadyCreated = createdProperties.some(created => created.name === name && created.id < id);
+        const isAlreadyCreated = createdProperties.some(created =>
+            created.resourcePath === resource.path && created.name === name && created.id < id);
 
         return isAlreadyDeclared || isAlreadyCreated;
     }

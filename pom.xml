@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>pl.ds.websight</groupId>
   <artifactId>websight-resource-browser-reactor</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <packaging>pom</packaging>
   <name>WebSight Resource Browser Reactor</name>
   <description>The reactor pom to build all WebSight Resource Browser modules</description>
@@ -36,7 +36,7 @@
     <connection>scm:git:ssh://github.com:DS-WebSight/websight-resource-browser.git</connection>
     <developerConnection>scm:git:ssh://github.com:DS-WebSight/websight-resource-browser.git</developerConnection>
     <url>https://github.com/DS-WebSight/websight-resource-browser</url>
-    <tag>1.0.3</tag>
+    <tag>1.0.4</tag>
   </scm>
   <build>
     <plugins>

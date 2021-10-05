@@ -9,7 +9,7 @@
   </parent>
   <groupId>pl.ds.websight</groupId>
   <artifactId>websight-resource-browser-content</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <packaging>content-package</packaging>
   <name>WebSight Resource Browser Content</name>
   <description>Resource Browser Content module</description>
@@ -36,7 +36,7 @@
     <connection>scm:git:ssh://github.com:DS-WebSight/websight-resource-browser.git</connection>
     <developerConnection>scm:git:ssh://github.com:DS-WebSight/websight-resource-browser.git</developerConnection>
     <url>https://github.com/DS-WebSight/websight-resource-browser</url>
-    <tag>1.0.3</tag>
+    <tag>1.0.4</tag>
   </scm>
   <build>
     <plugins>
